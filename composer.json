@@ -1,0 +1,19 @@
+{
+    "name": "nfservice/plugnotas",
+    "description": "Biblioteca para comunicaçao com a API de notas fiscais da tecnospeed",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jefferson Moreira",
+            "email": "jeematheus@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "NFService\\PlugNotas\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {}
+}

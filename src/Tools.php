@@ -1,6 +1,8 @@
 <?php
 namespace NFService\PlugNotas;
 
+use CURLFile;
+
 /**
  * Classe Tools
  *
@@ -355,6 +357,46 @@ class Tools
     }
 
     /**
+     * Função responsável pelo envio de dados de certificado para o Plugnotas
+     *
+     * @param array $dataCertificado Dados do certificado contendo o conteudo e senha
+     * @return array
+     */
+    public function enviaCertificado(array $dataCertificado) :array
+    {
+        $result = $this->upload("/certificado", [
+            'arquivo' => new CURLFile($dataCertificado['path'], 'application/octet-stream', $dataCertificado['name']),
+            'senha' => $dataCertificado['password']
+        ]);
+        return $result;
+    }
+
+    /**
+     * Função responsável por cadastrar os dados de uma empresa no PlugNotas
+     *
+     * @param array $dataEmpresa Dados da empresa
+     * @return array
+     */
+    public function cadastraEmpresa(array $dataEmpresa) :array
+    {
+        $result = $this->post("empresa", $dataEmpresa);
+        return $result;
+    }
+
+    /**
+     * Função responsável por atualizar os dados de uma empresa no PlugNotas
+     *
+     * @param string $cnpjEmpresa CNPJ da empresa a ser atualizada
+     * @param array $dataEmpresa Dados da empresa
+     * @return array
+     */
+    public function atualizaEmpresa(string $cnpjEmpresa, array $dataEmpresa) :array
+    {
+        $result = $this->patch("empresa/$cnpjEmpresa", $dataEmpresa);
+        return $result;
+    }
+
+    /**
      * Execute a GET Request
      *
      * @param string $path
@@ -426,6 +468,31 @@ class Tools
     }
 
     /**
+     * Execute a PATCH Request
+     *
+     * @param string $path
+     * @param string $body
+     * @param array $params
+     * @param array $headers Cabeçalhos adicionais para requisição
+     * @return array
+     */
+    private function patch(string $path, array $body = [], array $params = [], array $headers = []) :array
+    {
+        $opts = [
+            CURLOPT_CUSTOMREQUEST => "PATCH",
+            CURLOPT_POSTFIELDS => json_encode($body)
+        ];
+
+        if (!empty($headers) && is_array($headers)) {
+            $opts[CURLOPT_HTTPHEADER] = $headers;
+        }
+
+        $exec = $this->execute($path, $opts, $params);
+
+        return $exec;
+    }
+
+    /**
      * Execute a DELETE Request
      *
      * @param string $path
@@ -479,18 +546,17 @@ class Tools
      * @param array $headers Cabeçalhos adicionais para requisição
      * @return array
      */
-    private function upload(string $path, array $body = [], array $params = [], array $headers = []) :array
+    private function upload(string $path, array $body = [], array $params = []) :array
     {
         $opts = [
-            CURLOPT_CUSTOMREQUEST => "POST"
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => $body
         ];
         $this->isUpload = true;
 
-        if (!empty($headers) && is_array($headers)) {
-            $opts[CURLOPT_HTTPHEADER] = $headers;
-        }
-
         $exec = $this->execute($path, $opts, $params);
+        // Remove a flag de upload para não afetar requisições seguintes
+        $this->isUpload = false;
 
         return $exec;
     }

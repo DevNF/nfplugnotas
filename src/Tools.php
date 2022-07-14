@@ -372,6 +372,18 @@ class Tools
     }
 
     /**
+     * Função responsável por buscar os dados de uma empresa no PlugNotas
+     *
+     * @param array $cnpj CNPJ da empresa (Caso não informado retornará todas as empresas)
+     * @return array
+     */
+    public function buscaEmpresa(string $cnpj = '') :array
+    {
+        $result = $this->get("empresa/$cnpj");
+        return $result;
+    }
+
+    /**
      * Função responsável por cadastrar os dados de uma empresa no PlugNotas
      *
      * @param array $dataEmpresa Dados da empresa

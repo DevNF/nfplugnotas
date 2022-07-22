@@ -362,12 +362,33 @@ class Tools
      * @param array $dataCertificado Dados do certificado contendo o conteudo e senha
      * @return array
      */
-    public function enviaCertificado(array $dataCertificado) :array
+    public function enviaCertificado(array $dataCertificado, $cnpj = null, $vencimento = null) :array
     {
-        $result = $this->upload("/certificado", [
+        $result = $this->get('/certificado');
+
+        $id = '';
+        if ($result['httpCode'] == 200 && !empty($cnpj) && !empty($vencimento)) {
+            foreach ($result['body'] as $certificate) {
+                $date = explode(' ', $certificate->vencimento)[0];
+                if ($certificate->cnpj === $cnpj && $date === $vencimento) {
+                    $id = $certificate->id;
+                }
+            }
+        }
+
+        $method = 'POST';
+        $url = '/certificado';
+        $data = [
             'arquivo' => new CURLFile($dataCertificado['path'], 'application/octet-stream', $dataCertificado['name']),
             'senha' => $dataCertificado['password']
-        ]);
+        ];
+
+        if (!empty($id)) {
+            $url .= "/$id";
+            $method = 'PUT';
+        }
+
+        $result = $this->upload($url, $data, [], $method);
         return $result;
     }
 
@@ -554,14 +575,15 @@ class Tools
      * Execute a UPLOAD Request
      *
      * @param string $path
+     * @param array $body
      * @param array $params
-     * @param array $headers Cabeçalhos adicionais para requisição
+     * @param string $method Método da requisição
      * @return array
      */
-    private function upload(string $path, array $body = [], array $params = []) :array
+    private function upload(string $path, array $body = [], array $params = [], string $method = 'POST') :array
     {
         $opts = [
-            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POSTFIELDS => $body
         ];
         $this->isUpload = true;

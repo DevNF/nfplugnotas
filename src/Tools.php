@@ -430,6 +430,46 @@ class Tools
     }
 
     /**
+     * Função responsável por atualizar as séries NFe de uma empresa no PlugNotas
+     *
+     * @param  string $cnpjEmpresa CNPJ da empresa a ser atualizada
+     * @param  array  $series Array de series contendo serie e numero
+     * @return array
+     */
+    public function atualizaSeriesNfeEmpresa(string $cnpjEmpresa, array $series) :array
+    {
+        $dataEmpresa = [
+            'nfe' => [
+                'config' => [
+                    'numeracao' => $series
+                ]
+            ]
+        ];
+        $result = $this->patch("empresa/$cnpjEmpresa", $dataEmpresa);
+        return $result;
+    }
+
+    /**
+     * Função responsável por atualizar as séries NFCe de uma empresa no PlugNotas
+     *
+     * @param  string $cnpjEmpresa CNPJ da empresa a ser atualizada
+     * @param  array  $series Array de series contendo serie e numero
+     * @return array
+     */
+    public function atualizaSeriesNfceEmpresa(string $cnpjEmpresa, array $series) :array
+    {
+        $dataEmpresa = [
+            'nfce' => [
+                'config' => [
+                    'numeracao' => $series
+                ]
+            ]
+        ];
+        $result = $this->patch("empresa/$cnpjEmpresa", $dataEmpresa);
+        return $result;
+    }
+
+    /**
      * Execute a GET Request
      *
      * @param string $path

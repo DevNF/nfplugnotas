@@ -103,6 +103,26 @@ class Tools
     }
 
     /**
+     * Realiza o envio de 1 ou até 5000 NFSe para o Plugnotas
+     *
+     * @param array $dataNfses Array contendo as NFSes já no padrão Plugnotas
+     * @return array
+     */
+    public function enviaNfse(array $dataNfses) :array
+    {
+        if (empty($dataNfses)) {
+            throw new \Exception("Nenhuma NFSe informada");
+        }
+
+        if (count($dataNfses) > 5000) {
+            throw new \Exception("Máximo de 5000 NFSes por chamada");
+        }
+
+        $result = $this->post('/nfse', $dataNfses);
+        return $result;
+    }
+
+    /**
      * Realiza a consulta de uma NFe no PlugNotas a partir do campo idIntegracao
      *
      * @param string $emitente CNPJ do emitente sem formtação
@@ -125,6 +145,19 @@ class Tools
     public function resumoNfceIntegracao(string $emitente, string $idIntegracao) :array
     {
         $result = $this->get("/nfce/$emitente/$idIntegracao/resumo");
+        return $result;
+    }
+
+    /**
+     * Realiza a consulta de uma NFSe no PlugNotas a partir do campo idIntegracao
+     *
+     * @param string $emitente CNPJ do prestador sem formatação
+     * @param string $idIntegracao ID de Integração da NFSe no PlugNotas
+     * @return array
+     */
+    public function resumoNfseIntegracao(string $prestador, string $idIntegracao) :array
+    {
+        $result = $this->get("/nfse/consultar/$idIntegracao/$prestador");
         return $result;
     }
 
@@ -153,6 +186,18 @@ class Tools
     }
 
     /**
+     * Função responsável por buscar o XML de uma NFSe (usado para xml autorizado e cancelado)
+     *
+     * @param string $idPlugNotas ID da NFSe no PlugNotas
+     * @return array
+     */
+    public function xmlNfse(string $idPlugNotas) :array
+    {
+        $result = $this->get("/nfse/xml/$idPlugNotas");
+        return $result;
+    }
+
+    /**
      * Função responsável por buscar o PDF de uma NFe
      *
      * @param string $idPlugNotas ID da NFe no PlugNotas
@@ -173,6 +218,18 @@ class Tools
     public function pdfNfce(string $idPlugNotas) :array
     {
         $result = $this->get("/nfce/$idPlugNotas/pdf");
+        return $result;
+    }
+
+    /**
+     * Função responsável por buscar o PDF (DANFSe) de uma NFSe (usado para pdf autorizado e cancelado)
+     *
+     * @param string $idPlugNotas ID da NFSe no PlugNotas
+     * @return array
+     */
+    public function pdfNfse(string $idPlugNotas) :array
+    {
+        $result = $this->get("/nfse/pdf/$idPlugNotas");
         return $result;
     }
 
@@ -258,6 +315,23 @@ class Tools
     }
 
     /**
+     * Função responsável por solicitar o cancelamento de uma NFSe
+     *
+     * @param string $idPlugNotas ID da NFSe no PlugNotas
+     * @param string $codigo Código do cancelamento
+     * @param string $motivo Texto descritivo do motivo de cancelamento
+     * @return array
+     */
+    public function cancelamentoNfse(string $idPlugNotas, string $codigo = '', string $motivo = '') :array
+    {
+        $result = $this->post("/nfse/cancelar/$idPlugNotas", [
+            'codigo' => $codigo,
+            'motivo' => $motivo
+        ]);
+        return $result;
+    }
+
+    /**
      * Função responsável por consultar o cancelamento de uma NFe
      *
      * @param string $idPlugNotas ID da NFe no PlugNotas
@@ -278,6 +352,18 @@ class Tools
     public function consultaCancelamentoNfce(string $idPlugNotas) :array
     {
         $result = $this->get("/nfce/$idPlugNotas/cancelamento/status");
+        return $result;
+    }
+
+    /**
+     * Função responsável por consultar o cancelamento de uma NFSe
+     *
+     * @param string $protocoloPlugNotas Protocolo de cancelamento da NFSe
+     * @return array
+     */
+    public function consultaCancelamentoNfse(string $protocoloPlugNotas) :array
+    {
+        $result = $this->get("/nfse/cancelar/status/$protocoloPlugNotas");
         return $result;
     }
 
@@ -314,6 +400,97 @@ class Tools
     public function pdfCancelamentoNfe(string $idPlugNotas) :array
     {
         $result = $this->get("/nfe/$idPlugNotas/cancelamento/pdf");
+        return $result;
+    }
+
+    /**
+     * Função responsável por baixar o Recibo Provisório de Serviço (RPS)
+     *
+     * @param string $idPlugNotas ID da NFSe no PlugNotas
+     * @return array
+     */
+    public function downloadRpsNfse(string $idPlugNotas) :array
+    {
+        $result = $this->get("/nfse/rps/pdf/$idPlugNotas");
+        return $result;
+    }
+
+    /**
+     * Função responsável por resolver a sincronização de uma NFSe com a prefeitura
+     *
+     * @param string $idPlugNotas ID da NFSe no PlugNotas
+     * @param string $identificacaoNota Identificação da nota na prefeitura
+     * @return array
+     */
+    public function resolveNfse(string $idPlugNotas, string $identificacaoNota = '') :array
+    {
+        $result = $this->post("/nfse/resolve/$idPlugNotas", [
+            'identificacaoNota' => $identificacaoNota,
+        ]);
+        return $result;
+    }
+
+    /**
+     * Função responsável por enviar por e-mail XML e PDF da NFSe para os destinarários
+     *
+     * @param string $idPlugNotas ID da NFSe no PlugNotas
+     * @return array
+     */
+    public function enviarEmailNfse(string $idPlugNotas, array $destinatarios) :array
+    {
+        $result = $this->post("/nfse/email/$idPlugNotas", [
+            'destinatarios' => $destinatarios,
+        ]);
+        return $result;
+    }
+
+    /**
+     * Função responsável por enviar o arquivo com AIDFs dos municípios do padrão Governa
+     *
+     * @param string $cnpjPrestador CNPJ do prestador
+     * @param $filePath pasta temporária onde o arquivo está armazenado
+     * @param $serieRps série de RPS que deseja atualizar
+     * @param $numeroRps número de RPS que deseja atualizar
+     * @return array
+     */
+    public function enviaAIDF(string $cnpjPrestador, $filePath, $fileName, $serieRps = '', $numeroRps = '') :array
+    {
+        $method = 'POST';
+        $url = '/nfse/governa/numeracao';
+        $data = [
+            'cnpj' => $cnpjPrestador,
+            'file' => new CURLFile($filePath, 'text/plain', $fileName),
+            'serieRpsAtualizar' => $serieRps,
+            'numeroRpsAtualizar' => $numeroRps
+        ];
+
+        $result = $this->upload($url, $data, [], $method);
+
+        return $result;
+    }
+
+    /**
+    * Função responsável por consultar o retorno do arquivo com AIDFs dos municípios do padrão Governa
+    *
+    * @param string $cnpjPrestador CNPJ do prestador
+    * @param string $protoloco ID da NFSe no PlugNotas
+    * @return array
+    */
+    public function consultaAIDF(string $cnpjPrestador, string $plugNotasProtocol) :array
+    {
+        $result = $this->get("/nfse/governa/numeracao/$cnpjPrestador/$plugNotasProtocol");
+        return $result;
+    }
+
+    /**
+     * Função responsável por consultar disponibilidade de homologação do município (para NFSe) e metadados
+     *
+     * @param  string $codigoIbge
+     * @return array
+     */
+    public function consultaHomologacaoNfse(string $codigoIbge) :array
+    {
+        $result = $this->get("/nfse/cidades/$codigoIbge");
         return $result;
     }
 
@@ -462,6 +639,28 @@ class Tools
             'nfce' => [
                 'config' => [
                     'numeracao' => $series
+                ]
+            ]
+        ];
+        $result = $this->patch("empresa/$cnpjEmpresa", $dataEmpresa);
+        return $result;
+    }
+
+    /**
+     * Função responsável por atualizar as séries NFSe de uma empresa no PlugNotas
+     *
+     * @param  string $cnpjEmpresa CNPJ da empresa a ser atualizada
+     * @param  array  $series Array de series contendo serie e numero
+     * @return array
+     */
+    public function atualizaSeriesNfseEmpresa(string $cnpjEmpresa, array $series) :array
+    {
+        $dataEmpresa = [
+            'nfse' => [
+                'config' => [
+                    'rps' => [
+                        'numeracao' => $series
+                    ]
                 ]
             ]
         ];

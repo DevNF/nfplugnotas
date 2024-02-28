@@ -322,7 +322,7 @@ class Tools
      * @param string $motivo Texto descritivo do motivo de cancelamento
      * @return array
      */
-    public function cancelamentoNfse(string $idPlugNotas, string $codigo = '', string $motivo = '') :array
+    public function cancelamentoNfse(string $idPlugNotas, $codigo = '', $motivo = '') :array
     {
         $result = $this->post("/nfse/cancelar/$idPlugNotas", [
             'codigo' => $codigo,
@@ -609,62 +609,94 @@ class Tools
     /**
      * Função responsável por atualizar as séries NFe de uma empresa no PlugNotas
      *
-     * @param  string $cnpjEmpresa CNPJ da empresa a ser atualizada
-     * @param  array  $series Array de series contendo serie e numero
+     * @param  string $array $dadosEmpresa Array com dados da empresa a ser atualizada
+     * @param  array  $serie Array de series contendo serie e numero
      * @return array
      */
-    public function atualizaSeriesNfeEmpresa(string $cnpjEmpresa, array $series) :array
+    public function atualizaSeriesNfeEmpresa(array $dadosEmpresa, array $serie) :array
     {
         $dataEmpresa = [
             'nfe' => [
+                'ativo' => true,
+                'tipoContrato' => 0,
                 'config' => [
-                    'numeracao' => $series
+                    'producao' => $dadosEmpresa['ambiente'] == 1,
+                    'email' => [
+                        'envio' => true
+                    ],
+                    'impressaoFcp' => true,
+                    'impressaoPartilha' => true,
+                    'dfe' => [
+                        'ativo' => true
+                    ],
+                    'numeracao' => $serie
                 ]
             ]
         ];
-        $result = $this->patch("empresa/$cnpjEmpresa", $dataEmpresa);
+
+        $cnpj = $dadosEmpresa['cpfcnpj'];
+        $result = $this->patch("empresa/$cnpj", $dataEmpresa);
         return $result;
     }
 
     /**
      * Função responsável por atualizar as séries NFCe de uma empresa no PlugNotas
      *
-     * @param  string $cnpjEmpresa CNPJ da empresa a ser atualizada
-     * @param  array  $series Array de series contendo serie e numero
+     * @param  string $array $dadosEmpresa Array com dados da empresa a ser atualizada
+     * @param  array  $serie Array de series contendo serie e numero
      * @return array
      */
-    public function atualizaSeriesNfceEmpresa(string $cnpjEmpresa, array $series) :array
+    public function atualizaSeriesNfceEmpresa(array $dadosEmpresa, array $serie) :array
     {
         $dataEmpresa = [
             'nfce' => [
+                'ativo' => true,
+                'tipoContrato' => 0,
                 'config' => [
-                    'numeracao' => $series
+                    'producao' => $dadosEmpresa['ambiente'] == 1,
+                    'email' => [
+                        'envio' => true
+                    ],
+                    'sefaz' => [
+                        'idCodigoSegurancaContribuinte' => $dadosEmpresa['id_token_csc'],
+                        'codigoSegurancaContribuinte' => $dadosEmpresa['token_csc'],
+                    ],
+                    'numeracao' => $serie
                 ]
             ]
         ];
-        $result = $this->patch("empresa/$cnpjEmpresa", $dataEmpresa);
+        $cnpj = $dadosEmpresa['cpfcnpj'];
+        $result = $this->patch("empresa/$cnpj", $dataEmpresa);
         return $result;
     }
 
     /**
      * Função responsável por atualizar as séries NFSe de uma empresa no PlugNotas
      *
-     * @param  string $cnpjEmpresa CNPJ da empresa a ser atualizada
-     * @param  array  $series Array de series contendo serie e numero
+     * @param  string $array $dadosEmpresa Array com dados da empresa a ser atualizada
+     * @param  array  $serie Array de series contendo serie e numero
      * @return array
      */
-    public function atualizaSeriesNfseEmpresa(string $cnpjEmpresa, array $series) :array
+    public function atualizaSeriesNfseEmpresa(array $dadosEmpresa, array $serie) :array
     {
         $dataEmpresa = [
             'nfse' => [
+                'ativo' => true,
+                'tipoContrato' => 0,
                 'config' => [
+                    'producao' => $dadosEmpresa['ambiente'] == 1,
+                    'nfseNacional' => $dadosEmpresa['nfse_nacional'],
+                    'calculoAutomaticoIbpt' => [
+                        'ativo' => 'true'
+                    ],
                     'rps' => [
-                        'numeracao' => $series
+                        'numeracao' => $serie
                     ]
                 ]
             ]
         ];
-        $result = $this->patch("empresa/$cnpjEmpresa", $dataEmpresa);
+        $cnpj = $dadosEmpresa['cpfcnpj'];
+        $result = $this->patch("empresa/$cnpj", $dataEmpresa);
         return $result;
     }
 

@@ -541,15 +541,17 @@ class Tools
      */
     public function enviaCertificado(array $dataCertificado, $cnpj = null, $vencimento = null) :array
     {
-        $result = $this->get('/certificado');
+        $url = '/certificado';
+        if (!empty($cnpj)) {
+            $url .= "/$cnpj";
+        }
+        $result = $this->get($url);
 
         $id = '';
         if ($result['httpCode'] == 200 && !empty($cnpj) && !empty($vencimento)) {
-            foreach ($result['body'] as $certificate) {
-                $date = explode(' ', $certificate->vencimento)[0];
-                if ($certificate->cnpj === $cnpj && $date === $vencimento) {
-                    $id = $certificate->id;
-                }
+            $date = explode(' ', $result['body']->vencimento)[0];
+            if ($date === $vencimento) {
+                $id = $result['body']->id;
             }
         }
 

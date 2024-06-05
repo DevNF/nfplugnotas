@@ -572,6 +572,38 @@ class Tools
     }
 
     /**
+     * Função responsável pelo envio da logo para o Plugnotas
+     *
+     * @param string $pathLogo pasta temporária da logo
+     * @param string $cnpj cnpj da empresa
+     * @param string $extension extensao da logo
+     * @return array
+     */
+    public function enviaLogo(string $pathLogo, $cnpj = null, $extension) :array
+    {
+        $method = 'POST';
+        $url = "/empresa/$cnpj/logotipo";
+        $data = [
+            'arquivo' => new CURLFile($pathLogo, 'imagem/'.$extension, 'logotipo'.$cnpj),
+        ];
+
+        $result = $this->upload($url, $data, [], $method);
+        return $result;
+    }
+
+    /**
+     * Função responsável por remover a logo da empresa do Plugnotas
+     *
+     * @param string $cnpj CNPJ da empresa
+     * @return array
+     */
+    public function removeLogo(string $cnpj) :array
+    {
+        $result = $this->delete("empresa/$cnpj/logotipo");
+        return $result;
+    }
+
+    /**
      * Função responsável por buscar os dados de uma empresa no PlugNotas
      *
      * @param array $cnpj CNPJ da empresa (Caso não informado retornará todas as empresas)

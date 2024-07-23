@@ -136,6 +136,18 @@ class Tools
     }
 
     /**
+     * Realiza a consulta de uma NFe no PlugNotas a partir do campo Chave de Acesso
+     *
+     * @param string $chaveAcesso Chave de acesso da NFe
+     * @return array
+     */
+    public function resumoNfeChave(string $chaveAcesso) :array
+    {
+        $result = $this->get("/nfe/$chaveAcesso/resumo");
+        return $result;
+    }
+
+    /**
      * Realiza a consulta de uma NFCe no PlugNotas a partir do campo idIntegracao
      *
      * @param string $emitente CNPJ do emitente sem formtação
@@ -145,6 +157,18 @@ class Tools
     public function resumoNfceIntegracao(string $emitente, string $idIntegracao) :array
     {
         $result = $this->get("/nfce/$emitente/$idIntegracao/resumo");
+        return $result;
+    }
+
+    /**
+     * Realiza a consulta de uma NFCe no PlugNotas a partir do campo Chave de Acesso
+     *
+     * @param string $chaveAcesso Chave de acesso da NFCe
+     * @return array
+     */
+    public function resumoNfceChave(string $chaveAcesso) :array
+    {
+        $result = $this->get("/nfce/$chaveAcesso/resumo");
         return $result;
     }
 
